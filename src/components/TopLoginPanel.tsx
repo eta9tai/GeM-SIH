@@ -306,12 +306,7 @@ export const TopLoginPanel: React.FC<TopLoginPanelProps> = ({
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {MOCK_BIDDER_ACCOUNTS.map((bidder) => {
-                    const isGreen = bidder.complianceScore > 90;
-                    const isOrange = bidder.complianceScore >= 60 && bidder.complianceScore <= 90;
-                    const isRed = bidder.complianceScore < 60;
-                    const zoneLabel = isGreen ? 'GREEN ZONE' : isOrange ? 'ORANGE ZONE' : 'RED ZONE';
-                    const zoneColor = isGreen ? 'bg-emerald-900 text-emerald-200' : isOrange ? 'bg-amber-900 text-amber-200' : 'bg-rose-900 text-rose-200';
-
+                    const tagLabel = bidder.tags[0] || 'ACTIVE VENDOR';
                     return (
                       <div
                         key={bidder.id}
@@ -324,8 +319,8 @@ export const TopLoginPanel: React.FC<TopLoginPanelProps> = ({
                       >
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span className="text-xs font-bold text-white truncate">{bidder.companyName}</span>
-                          <span className={`text-[8px] font-mono font-black px-1 py-0.2 ${zoneColor}`}>
-                            {zoneLabel}
+                          <span className="text-[8px] font-mono font-black px-1.5 py-0.5 bg-slate-700 text-emerald-300 border border-slate-600">
+                            {tagLabel}
                           </span>
                         </div>
                         <div className="text-[10px] text-slate-300 line-clamp-1">{bidder.location}</div>

@@ -240,7 +240,7 @@ export const OutcomePreviewPaidFeature: React.FC<OutcomePreviewPaidFeatureProps>
                   STATISTICAL PREDICTION RESULT
                 </span>
                 <span className="text-xs font-bold text-emerald-900">
-                  Calculated against current tender stratification pool
+                  Calculated against participating bidder pool & technical benchmarks
                 </span>
               </div>
               <h4 className="text-base font-black text-emerald-950">

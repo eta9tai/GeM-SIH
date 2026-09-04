@@ -35,13 +35,23 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
   activeTender,
   cureWindowDays
 }) => {
-  // Configurable application timeline (5 weeks, 5 days, 6 days, 7 days, or 4 days ago)
+  // Application timeline using random hardcoded day values only (days only, no weeks or months)
   const defaultAppliedDuration = useMemo(() => {
-    if (bidder.id === 'bidder-vidarbha-disq') return '5 weeks ago';
-    if (bidder.id === 'bidder-western') return '7 days ago';
-    if (bidder.id === 'bidder-marudhar') return '5 days ago';
-    if (bidder.id === 'bidder-howrah-gears') return '4 days ago';
-    return '6 days ago';
+    // Hardcoded variation per bidder ID using day values only
+    const daysMap: Record<string, string> = {
+      'bidder-sahyadri': 'Applied 5 days ago',
+      'bidder-marudhar': 'Applied 4 days ago',
+      'bidder-vidarbha-disq': 'Applied 8 days ago',
+      'bidder-western': 'Applied 7 days ago',
+      'bidder-howrah-gears': 'Applied 6 days ago',
+      'bidder-apex-heavy': 'Applied 5 days ago',
+    };
+    if (daysMap[bidder.id]) return daysMap[bidder.id];
+
+    // Deterministic random day between 4 and 8 for any other bidder
+    const hash = bidder.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const day = 4 + (hash % 5); // yields 4, 5, 6, 7, or 8
+    return `Applied ${day} days ago`;
   }, [bidder.id]);
 
   const [appliedDuration, setAppliedDuration] = useState<string>(defaultAppliedDuration);
@@ -140,7 +150,7 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
           <div>Contract Value: <strong className="text-slate-900 font-mono">₹{((activeTender.contractValue || 0) / 100000).toFixed(2)} Lakhs</strong></div>
         </div>
 
-        {/* PROMINENT SUBMISSION TIMELINE BADGE (Applied 5 weeks, 5 days, 6 days, 7 days, or 4 days ago) */}
+        {/* PROMINENT SUBMISSION TIMELINE BADGE (Applied 4 days ago, Applied 5 days ago, etc. - Days only) */}
         <div className="p-3 bg-amber-50/70 border-2 border-amber-300 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
@@ -149,15 +159,15 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
             <div>
               <div className="text-[11px] text-amber-900 font-medium">Submission Timestamp Record:</div>
               <div className="text-xs sm:text-sm font-black text-slate-900">
-                You applied to this bid <span className="text-amber-800 underline decoration-amber-500 font-mono font-extrabold">{appliedDuration}</span>
+                You applied to this bid: <span className="text-amber-800 underline decoration-amber-500 font-mono font-extrabold">{appliedDuration}</span>
               </div>
             </div>
           </div>
 
-          {/* Quick interactive test pill to switch applied duration */}
+          {/* Quick interactive test pill to switch applied duration (days only) */}
           <div className="flex items-center gap-1 text-[10px]">
-            <span className="text-slate-500 font-medium mr-1">Switch timeline:</span>
-            {['4 days ago', '5 days ago', '6 days ago', '7 days ago', '5 weeks ago'].map((d) => (
+            <span className="text-slate-500 font-medium mr-1">Switch timeline (days only):</span>
+            {['Applied 4 days ago', 'Applied 5 days ago', 'Applied 6 days ago', 'Applied 7 days ago', 'Applied 8 days ago'].map((d) => (
               <button
                 key={d}
                 type="button"
@@ -175,29 +185,36 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
         </div>
       </div>
 
-      {/* SPECIAL CONVERSATIONAL HINDI / ENGLISH DOCUMENT PENDING CALLOUT BANNER */}
+      {/* SPECIAL PERSONALIZED DOCUMENT PENDING NOTIFICATION */}
       {hasPendingDocument && (
-        <div className="bg-amber-100 border-2 border-amber-500 p-5 text-amber-950 shadow-md">
+        <div className="bg-amber-50 border-2 border-amber-500 p-5 text-slate-900 shadow-md">
           <div className="flex items-start gap-3.5">
             <div className="w-10 h-10 bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 font-black">
               <AlertTriangle className="w-6 h-6" />
             </div>
 
-            <div className="space-y-2 flex-1">
-              {/* The exact Hindi quote requested */}
-              <div className="inline-block px-3 py-1 bg-amber-300 border border-amber-500 text-slate-950 font-black text-sm sm:text-base tracking-wide font-hindi shadow-xs">
-                “आपका अच्छा है, लेकिन आपका भाई साहब, ये document pending है”
+            <div className="space-y-3 flex-1">
+              {/* Primary English Quote */}
+              <div className="p-3 bg-white border-2 border-amber-400 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xs flex items-center gap-2">
+                <span className="text-amber-600 font-serif text-lg">“</span>
+                <span>Your application looks good, but one document is still pending. Please upload the required document to proceed.</span>
+                <span className="text-amber-600 font-serif text-lg">”</span>
               </div>
 
-              <p className="text-xs text-amber-950 leading-relaxed font-medium">
-                महोदय, आपकी कंपनी की बुनियादी योग्यता एवं तकनीकी साख (technical credentials) बहुत अच्छी है, लेकिन भाई साहब, नीचे दर्शाया गया यह आवश्यक दस्तावेज़ (supporting document) अभी लंबित (pending) है। निविदा के अंतिम वित्तीय मूल्यांकन में अपनी मजबूत स्थिति बनाए रखने के लिए आपको इसे निर्धारित समय-सीमा के भीतर तत्काल अपलोड करना होगा।
+              {/* Conversational Hindi Quote */}
+              <div className="text-xs text-amber-900 font-hindi font-bold flex items-center gap-1.5">
+                <span>“आपका अच्छा है, लेकिन आपका भाई साहब, ये document pending है - कृपया आगे बढ़ने के लिए आवश्यक दस्तावेज़ अपलोड करें।”</span>
+              </div>
+
+              <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                Dear {bidder.companyName}, the technical scrutiny committee has reviewed your credentials. However, the mandatory supporting document specified below is pending verification. Please upload the required certified document directly to proceed with final procurement processing.
               </p>
 
               {/* Pending Documents Action Card */}
               <div className="mt-3 space-y-2">
                 <div className="text-xs font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
                   <FileText className="w-4 h-4 text-amber-700" />
-                  <span>Pending Document Verification Requirements:</span>
+                  <span>Identified Pending Supporting Document:</span>
                 </div>
 
                 {missingDocsList.map((doc, idx) => {
@@ -213,7 +230,10 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
                     >
                       <div className="flex items-center gap-2.5">
                         <FileText className={`w-4 h-4 shrink-0 ${isUploaded ? 'text-emerald-600' : 'text-amber-600'}`} />
-                        <span className="text-xs font-bold">{doc}</span>
+                        <div>
+                          <div className="text-xs font-bold">{doc}</div>
+                          <div className="text-[10px] text-amber-800">Status: {isUploaded ? 'Verified & Attached' : 'Mandatory Requirement Pending'}</div>
+                        </div>
                       </div>
 
                       <div>
@@ -324,49 +344,64 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
             Dear Bidder,
           </p>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* 1. Your application has been reviewed successfully. */}
-            <div className="flex items-start gap-2.5">
-              <span className="font-bold font-mono text-[#002B49] shrink-0">1.</span>
-              <p>
-                <strong className="text-slate-950 font-bold">Your application has been reviewed successfully.</strong> The technical scrutiny committee and automated statutory verification systems have verified your bid submission against the published qualification criteria.
-              </p>
-            </div>
-
-            {/* 2. Based on the stratification of the bidders in the same tender, the procurement has been completed. */}
-            <div className="flex items-start gap-2.5">
-              <span className="font-bold font-mono text-[#002B49] shrink-0">2.</span>
-              <p>
-                <strong className="text-slate-950 font-bold">Based on the stratification of the bidders in the same tender, the procurement evaluation has been completed.</strong> All participating bids received across ministries and public sector undertakings have been categorized in strict conformity with General Financial Rules (GFR) 2017.
-              </p>
-            </div>
-
-            {/* 3. The chances of you getting this tender are high. */}
-            <div className="flex items-start gap-2.5">
-              <span className="font-bold font-mono text-[#002B49] shrink-0">3.</span>
-              <p>
-                <strong className="text-emerald-800 font-bold">The chances of you getting this tender are high.</strong> Your technical conformity, statutory declarations (GSTN, EPFO, MSME Udyam, Make in India local content), and evaluated rates place your bid in an advantageous competitive position for final award upon commercial unsealing.
-              </p>
-            </div>
-
-            {/* 4. You may stay on this tender or leave it right now. */}
-            <div className="flex items-start gap-2.5">
-              <span className="font-bold font-mono text-[#002B49] shrink-0">4.</span>
-              <p>
-                <strong className="text-slate-950 font-bold">You may stay on this tender or leave it right now.</strong> Under statutory procurement guidelines, you possess the autonomous right to maintain your active bid participation or withdraw your quotation prior to final commercial decryption.
-              </p>
-            </div>
-
-            {/* 5. Change or withdraw your decision. */}
-            <div className="flex items-start gap-2.5">
-              <span className="font-bold font-mono text-[#002B49] shrink-0">5.</span>
-              <div className="space-y-2 flex-1">
-                <p>
-                  <strong className="text-slate-950 font-bold">Change or withdraw your decision:</strong> You can confirm your active bid participation or exercise your formal right of withdrawal using the decision controls below.
+            <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200">
+              <span className="font-bold font-mono text-[#002B49] text-sm shrink-0">1.</span>
+              <div>
+                <h3 className="text-slate-950 font-black text-sm">Your application has been reviewed successfully.</h3>
+                <p className="text-xs text-slate-700 mt-0.5">
+                  The technical scrutiny committee and automated statutory verification systems have completed verification of your bid submission against the published qualification criteria.
                 </p>
+              </div>
+            </div>
+
+            {/* 2. Based on the stratification of bidders participating in the same tender, the procurement process has been completed. */}
+            <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200">
+              <span className="font-bold font-mono text-[#002B49] text-sm shrink-0">2.</span>
+              <div>
+                <h3 className="text-slate-950 font-black text-sm">Based on the stratification of bidders participating in the same tender, the procurement process has been completed.</h3>
+                <p className="text-xs text-slate-700 mt-0.5">
+                  All participating bids received across ministries and public sector undertakings have been categorized in strict conformity with General Financial Rules (GFR) 2017.
+                </p>
+              </div>
+            </div>
+
+            {/* 3. Your chances of being awarded this tender are high. */}
+            <div className="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-300">
+              <span className="font-bold font-mono text-emerald-800 text-sm shrink-0">3.</span>
+              <div>
+                <h3 className="text-emerald-900 font-black text-sm">Your chances of being awarded this tender are high.</h3>
+                <p className="text-xs text-emerald-800 mt-0.5">
+                  Your technical conformity, statutory declarations (GSTN, EPFO, MSME Udyam, Make in India local content), and evaluated rates place your bid in an advantageous competitive position for final award upon commercial unsealing.
+                </p>
+              </div>
+            </div>
+
+            {/* 4. You may choose to remain on this tender or leave it now. */}
+            <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200">
+              <span className="font-bold font-mono text-[#002B49] text-sm shrink-0">4.</span>
+              <div>
+                <h3 className="text-slate-950 font-black text-sm">You may choose to remain on this tender or leave it now.</h3>
+                <p className="text-xs text-slate-700 mt-0.5">
+                  Under statutory procurement guidelines, you possess the autonomous right to maintain your active bid participation or withdraw your quotation prior to final commercial decryption.
+                </p>
+              </div>
+            </div>
+
+            {/* 5. You can change or withdraw your decision at any time, if applicable. */}
+            <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200">
+              <span className="font-bold font-mono text-[#002B49] text-sm shrink-0">5.</span>
+              <div className="space-y-3 flex-1">
+                <div>
+                  <h3 className="text-slate-950 font-black text-sm">You can change or withdraw your decision at any time, if applicable.</h3>
+                  <p className="text-xs text-slate-700 mt-0.5">
+                    Confirm your continued participation or exercise formal withdrawal using the decision controls below:
+                  </p>
+                </div>
 
                 {/* Interactive Decision Control Box */}
-                <div className="p-3.5 bg-slate-50 border-2 border-slate-300 flex flex-wrap items-center justify-between gap-3">
+                <div className="p-3.5 bg-white border-2 border-slate-300 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                   <div className="space-y-0.5">
                     <div className="text-[11px] font-bold text-slate-500 uppercase">Current Bidder Participation Status:</div>
                     <div className="flex items-center gap-2">
@@ -409,12 +444,46 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
               </div>
             </div>
 
-            {/* 6. Upload any supporting documents required above. */}
-            <div className="flex items-start gap-2.5">
-              <span className="font-bold font-mono text-[#002B49] shrink-0">6.</span>
-              <p>
-                <strong className="text-slate-950 font-bold">Upload any supporting documents required above.</strong> In the event that any supplementary document, OEM endorsement, or CA turnover certificate has been flagged, please utilize the cure window upload interface above to submit the verified files.
-              </p>
+            {/* 6. If any supporting documents are required, clearly notify the bidder and provide an option to upload the required documents. */}
+            <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200">
+              <span className="font-bold font-mono text-[#002B49] text-sm shrink-0">6.</span>
+              <div className="space-y-2 flex-1">
+                <h3 className="text-slate-950 font-black text-sm">If any supporting documents are required, clearly notify the bidder and provide an option to upload the required documents.</h3>
+                {hasPendingDocument ? (
+                  <div className="p-3 bg-amber-50 border border-amber-300 space-y-2">
+                    <p className="text-xs text-amber-950 font-semibold">
+                      Notice: One supporting document is currently pending verification for your account. Please use the direct upload control below:
+                    </p>
+                    {missingDocsList.map((doc, idx) => {
+                      const isUploaded = uploadedDocs.includes(doc);
+                      return (
+                        <div key={idx} className="flex flex-wrap items-center justify-between gap-2 p-2 bg-white border border-amber-300">
+                          <span className="text-xs font-bold text-slate-900">{doc}</span>
+                          {isUploaded ? (
+                            <span className="text-xs font-bold text-emerald-700 font-mono flex items-center gap-1">
+                              <Check className="w-3.5 h-3.5" /> Uploaded & Authenticated
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleReuploadDoc(doc)}
+                              disabled={isUploading}
+                              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase flex items-center gap-1"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>{isUploading ? 'Uploading...' : 'Upload Document'}</span>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-emerald-800 font-medium">
+                    All mandatory supporting documents for your account have been successfully verified and attached to your submission file.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -428,7 +497,7 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
               <span>CRYPTOGRAPHICALLY SEALED • GFR 2017 RULE 149(viii)</span>
             </div>
             <div className="text-[10px] text-slate-500">
-              Note: Confidential officer evaluation vectors and zone stratification matrices remain protected under central procurement rules.
+              Note: Confidential officer evaluation vectors and internal audit matrices remain protected under central procurement rules.
             </div>
           </div>
 
@@ -481,12 +550,41 @@ export const BidderPortalView: React.FC<BidderPortalViewProps> = ({
         </div>
       )}
 
-      {/* NEXT PART: OUTCOME PREVIEW (PAID FEATURE) */}
-      <OutcomePreviewPaidFeature
-        bidder={bidder}
-        activeTender={activeTender}
-        hasUploadedPendingDoc={uploadedDocs.length > 0}
-      />
+      {/* TRANSITION TO NEXT PART: OUTCOME PREVIEW */}
+      <div className="bg-[#002B49] text-white p-5 border-2 border-slate-900 shadow-md flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 bg-amber-400 text-slate-950 font-mono font-black text-[10px] uppercase">
+              NEXT PART
+            </span>
+            <span className="text-xs text-amber-300 font-bold uppercase tracking-wider">
+              OFFICIAL EVALUATION INTELLIGENCE
+            </span>
+          </div>
+          <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-wide">
+            Outcome Preview
+          </h2>
+          <p className="text-xs text-slate-300 max-w-2xl">
+            Proceed below to access your confidential Outcome Preview suite. Review statistical win probabilities, evaluated rate corridor benchmarks, and compliance audit certificates before financial bid opening.
+          </p>
+        </div>
+
+        <a
+          href="#outcome-preview-section"
+          className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all shadow-md"
+        >
+          <span>Proceed to Outcome Preview</span>
+          <ArrowRight className="w-4 h-4" />
+        </a>
+      </div>
+
+      <div id="outcome-preview-section">
+        <OutcomePreviewPaidFeature
+          bidder={bidder}
+          activeTender={activeTender}
+          hasUploadedPendingDoc={uploadedDocs.length > 0}
+        />
+      </div>
 
       {/* Bidder Document Repository Status (DigiLocker & Handshakes) */}
       <div className="bg-white border-2 border-slate-300 p-5 shadow-xs">
