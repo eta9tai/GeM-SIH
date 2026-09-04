@@ -27,6 +27,7 @@ import {
   Download,
   Info,
   ChevronRight,
+  ArrowRight,
   UserCheck
 } from 'lucide-react';
 import { Tender, Bidder, BidderDocumentRecord, ComplianceDocCategory } from '../types';
@@ -39,13 +40,15 @@ interface ComplianceDashboardProps {
   selectedTenderId?: string;
   onTenderSelect?: (tenderId: string) => void;
   onSealAuditOnBlockchain?: (tenderRef: string, bidderName: string, remarks: string, isApproved: boolean) => void;
+  onProceedToStratification?: () => void;
 }
 
 export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
   tenders,
   selectedTenderId,
   onTenderSelect,
-  onSealAuditOnBlockchain
+  onSealAuditOnBlockchain,
+  onProceedToStratification
 }) => {
   // Current Tender state
   const activeTender = useMemo(() => {
@@ -654,7 +657,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
                   {anomalyCount > 0 && (
                     <button
                       onClick={() => handleSealAudit(false)}
-                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-colors"
+                      className="px-4 py-2 border border-rose-800 bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
                     >
                       <XCircle className="w-4 h-4" />
                       <span>Issue Disqualification Order (Rule 151)</span>
@@ -663,12 +666,38 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
 
                   <button
                     onClick={() => handleSealAudit(true)}
-                    className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow-lg transition-colors"
+                    className="px-5 py-2 border border-slate-950 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition-colors"
                   >
                     <Lock className="w-4 h-4 text-amber-400" />
                     <span>Seal Compliance Audit on Blockchain</span>
                   </button>
                 </div>
+              </div>
+
+              {/* Stage 1 Completed -> Stage 2 Move to Stratification Banner */}
+              <div className="bg-[#002B49] border-2 border-amber-500 p-4 text-white flex flex-wrap items-center justify-between gap-4 mt-4 shadow-md">
+                <div className="space-y-1 max-w-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-amber-400 text-slate-950 text-[10px] font-black font-mono uppercase">
+                      STAGE 1 AUDIT COMPLETED
+                    </span>
+                    <span className="text-xs font-bold text-amber-300">
+                      All Statutory Annexures & Handshakes Audited
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Move forward to Stage 2: 100-Bidder Stratification to inspect the Green Zone (Top 34% Ideal Bids), Orange Zone (5-Day Cure Window), and Red Zone (Disqualified).
+                  </p>
+                </div>
+
+                {onProceedToStratification && (
+                  <button
+                    onClick={onProceedToStratification}
+                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-2 border border-amber-300 transition-colors shadow-lg"
+                  >
+                    <span>Move to Next Stage: Bidder Stratification ➔</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

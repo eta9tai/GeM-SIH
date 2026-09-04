@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Header } from './components/Header';
+import { Header, PortalViewType } from './components/Header';
+import { TopLoginPanel } from './components/TopLoginPanel';
 import { NamastePreloader } from './components/NamastePreloader';
 import { TenderList } from './components/TenderList';
 import { DecisionTreeFlow } from './components/DecisionTreeFlow';
@@ -9,6 +10,9 @@ import { TenderDetailModal } from './components/TenderDetailModal';
 import { AIVerificationEngineModal } from './components/AIVerificationEngineModal';
 import { AskGeMMyChatbot } from './components/AskGeMMyChatbot';
 import { ComplianceDashboard } from './components/ComplianceDashboard';
+import { BidderZoneStratification } from './components/BidderZoneStratification';
+import { BidderPortalView } from './components/BidderPortalView';
+import { TenderPinModal } from './components/TenderPinModal';
 import { AuthModal } from './components/AuthModal';
 import { FresherOnboardingModal } from './components/FresherOnboardingModal';
 import { EfficiencyLogicExplainerModal } from './components/EfficiencyLogicExplainerModal';
@@ -22,7 +26,7 @@ export default function App() {
   const [showPreloader, setShowPreloader] = useState(true);
   const [tenders, setTenders] = useState<Tender[]>(INITIAL_TENDERS);
   const [blockchainLedger, setBlockchainLedger] = useState<BlockchainBlock[]>(INITIAL_BLOCKCHAIN_LEDGER);
-  const [activeView, setActiveView] = useState<'tenders' | 'compliance_dashboard' | 'tree_flow' | 'blockchain' | 'analytics'>('tenders');
+  const [activeView, setActiveView] = useState<PortalViewType>('tenders');
   const [selectedComplianceTenderId, setSelectedComplianceTenderId] = useState<string>(INITIAL_TENDERS[0].id);
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
   const [fontSize, setFontSize] = useState<'small' | 'normal' | 'large'>('normal');
@@ -33,11 +37,13 @@ export default function App() {
   const [currentOfficer, setCurrentOfficer] = useState<ProcurementOfficer>(MOCK_PROCUREMENT_OFFICERS[0]);
   const [currentBidder, setCurrentBidder] = useState<BidderAccount>(MOCK_BIDDER_ACCOUNTS[0]);
   const [isCrossTerritoryOverride, setIsCrossTerritoryOverride] = useState<boolean>(false);
+  const [cureWindowDays, setCureWindowDays] = useState<number>(5);
 
-  // Modals for Auth, Fresher Onboarding, and Explainer
+  // Modals for Auth, Fresher Onboarding, Explainer, and Tender PIN
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isFresherModalOpen, setIsFresherModalOpen] = useState<boolean>(false);
   const [isExplainerModalOpen, setIsExplainerModalOpen] = useState<boolean>(false);
+  const [tenderForPinModal, setTenderForPinModal] = useState<Tender | null>(null);
 
   // Modals
   const [selectedTenderForModal, setSelectedTenderForModal] = useState<Tender | null>(null);
@@ -48,7 +54,7 @@ export default function App() {
     INITIAL_TENDERS[0].bids[0]
   );
 
-  // Territorial Jurisdiction Filtering
+  // Territorial Jurisdiction Filtering for Officer
   const displayedTenders = useMemo(() => {
     if (currentRole === 'officer' && !isCrossTerritoryOverride) {
       return tenders.filter(t => {
@@ -77,6 +83,14 @@ export default function App() {
     }
     return tenders;
   }, [tenders, currentRole, currentOfficer, isCrossTerritoryOverride]);
+
+  // Active Tender for Compliance & Stratification
+  const activeTender = useMemo(() => {
+    return (
+      tenders.find(t => t.id === selectedComplianceTenderId || t.tenderId === selectedComplianceTenderId) ||
+      tenders[0]
+    );
+  }, [tenders, selectedComplianceTenderId]);
 
   const handleOpenAIVerifier = (bidder: Bidder, tender: Tender) => {
     setSelectedBidderForVerifier({ bidder, tender });
@@ -166,6 +180,18 @@ export default function App() {
   // Flat list of all bidders for switcher
   const allBiddersList = tenders.flatMap(t => t.bids);
 
+  // Handle Officer selecting a Tender to evaluate -> triggers PIN authorization gate
+  const handleSelectTenderToEvaluate = (tender: Tender) => {
+    setTenderForPinModal(tender);
+  };
+
+  // When Tender PIN successfully unlocks
+  const handlePinUnlockSuccess = (tender: Tender) => {
+    setSelectedComplianceTenderId(tender.id);
+    setActiveView('compliance_dashboard');
+    setTenderForPinModal(null);
+  };
+
   return (
     <div className={`min-h-screen bg-[#F4F6F8] flex flex-col text-slate-900 ${fontSizeClass}`} id="gem-root-container">
       {/* Big Bold Hindi Namaste Preloader */}
@@ -173,7 +199,28 @@ export default function App() {
         <NamastePreloader onComplete={() => setShowPreloader(false)} />
       )}
 
-      {/* Main Header & Nav */}
+      {/* Top Official Government Login & Role Bar (Proper Login Panel) */}
+      <TopLoginPanel
+        currentRole={currentRole}
+        currentOfficer={currentOfficer}
+        currentBidder={currentBidder}
+        isAuthenticated={true}
+        onLoginOfficer={(officer) => {
+          setCurrentOfficer(officer);
+          setCurrentRole('officer');
+          setIsCrossTerritoryOverride(false);
+          setActiveView('tenders');
+        }}
+        onLoginBidder={(bidder) => {
+          setCurrentBidder(bidder);
+          setCurrentRole('bidder');
+          setIsCrossTerritoryOverride(false);
+          setActiveView('bidder_workspace');
+        }}
+        onSwitchAccount={() => setIsAuthModalOpen(true)}
+      />
+
+      {/* Main Header & Sub Navigation */}
       <Header
         activeView={activeView}
         onSelectView={setActiveView}
@@ -191,86 +238,137 @@ export default function App() {
         onOpenExplainerModal={() => setIsExplainerModalOpen(true)}
       />
 
-      {/* Main Container */}
+      {/* Main Content Area */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Territorial Jurisdiction Security Banner */}
-        <JurisdictionBanner
-          currentRole={currentRole}
-          officer={currentOfficer}
-          bidder={currentBidder}
-          isCrossTerritoryOverride={isCrossTerritoryOverride}
-          onToggleCrossTerritoryOverride={() => setIsCrossTerritoryOverride(prev => !prev)}
-          onOpenAuthModal={() => setIsAuthModalOpen(true)}
-          onOpenFresherModal={() => setIsFresherModalOpen(true)}
-          onOpenExplainerModal={() => setIsExplainerModalOpen(true)}
-          filteredCount={displayedTenders.length}
-          totalCount={tenders.length}
-        />
-
-        {activeView === 'tenders' && (
-          <TenderList
-            tenders={displayedTenders}
-            onSelectTender={(tender) => setSelectedTenderForModal(tender)}
-            onOpenAIVerifier={handleOpenAIVerifier}
-            searchQuery={searchQuery}
+        {/* If Bidder Role: Exclusively Show Bidder Portal View */}
+        {currentRole === 'bidder' ? (
+          <BidderPortalView
+            bidder={currentBidder}
+            activeTender={activeTender}
+            cureWindowDays={cureWindowDays}
           />
-        )}
+        ) : (
+          /* Officer Views & Stage Flow */
+          <>
+            {/* Territorial Jurisdiction Security Banner */}
+            <JurisdictionBanner
+              currentRole={currentRole}
+              officer={currentOfficer}
+              bidder={currentBidder}
+              isCrossTerritoryOverride={isCrossTerritoryOverride}
+              onToggleCrossTerritoryOverride={() => setIsCrossTerritoryOverride(prev => !prev)}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+              onOpenFresherModal={() => setIsFresherModalOpen(true)}
+              onOpenExplainerModal={() => setIsExplainerModalOpen(true)}
+              filteredCount={displayedTenders.length}
+              totalCount={tenders.length}
+            />
 
-        {activeView === 'compliance_dashboard' && (
-          <ComplianceDashboard
-            tenders={displayedTenders.length > 0 ? displayedTenders : tenders}
-            selectedTenderId={selectedComplianceTenderId}
-            onTenderSelect={(tId) => setSelectedComplianceTenderId(tId)}
-            onSealAuditOnBlockchain={(tenderRef, bidderName, remarks, isApproved) => {
-              const lastBlock = blockchainLedger[blockchainLedger.length - 1];
-              const signerTitle = currentRole === 'officer'
-                ? `${currentOfficer.fakeName} (${currentOfficer.designation})`
-                : 'Senior Procurement Officer (GeM Certified)';
+            {/* Stage 1: Tenders List with PIN Lock Trigger */}
+            {activeView === 'tenders' && (
+              <div className="space-y-4">
+                <div className="p-3 bg-white border-2 border-slate-300 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-[#002B49] text-white font-mono font-bold text-[10px] uppercase">
+                      STEP 1 OF EVALUATION
+                    </span>
+                    <span className="font-bold text-slate-800">
+                      Select a Tender below to input your DSC Tender PIN and evaluate statutory compliance.
+                    </span>
+                  </div>
+                  <span className="text-slate-500 font-mono">
+                    Jurisdiction: {currentOfficer.jurisdiction.circleOrZone}
+                  </span>
+                </div>
 
-              const newBlock: BlockchainBlock = {
-                blockNumber: blockchainLedger.length,
-                timestamp: new Date().toLocaleString('en-IN') + ' IST',
-                previousHash: lastBlock.hash,
-                hash: `0x0000${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`,
-                nonce: Math.floor(Math.random() * 900000) + 100000,
-                merkleRoot: `0x${Math.random().toString(16).substring(2, 10)}...`,
-                tenderRef: tenderRef,
-                event: isApproved
-                  ? `Statutory Audit Passed: Annexure-1 Compliances Sealed on Ledger (${remarks.substring(0, 40)}...)`
-                  : `Statutory Disqualification Seal: Anomaly > 40% Detected (${remarks.substring(0, 40)}...)`,
-                verifiedBy: signerTitle,
-                bidderName: bidderName,
-                complianceScore: isApproved ? 96 : 38,
-                status: 'VALID'
-              };
-              setBlockchainLedger(prev => [...prev, newBlock]);
-            }}
-          />
-        )}
+                <TenderList
+                  tenders={displayedTenders}
+                  onSelectTender={handleSelectTenderToEvaluate}
+                  onOpenAIVerifier={handleOpenAIVerifier}
+                  searchQuery={searchQuery}
+                />
+              </div>
+            )}
 
-        {activeView === 'tree_flow' && (
-          <DecisionTreeFlow
-            selectedBidder={treeSelectedBidder}
-            allBidders={allBiddersList}
-            onSelectBidder={(b) => setTreeSelectedBidder(b)}
-            onOpenAuditModal={(b) => {
-              const matchedTender = tenders.find(t => t.bids.some(bid => bid.id === b.id)) || tenders[0];
-              handleOpenAIVerifier(b, matchedTender);
-            }}
-          />
-        )}
+            {/* Stage 2: Compliance & Variance Analysis Matrix */}
+            {activeView === 'compliance_dashboard' && (
+              <ComplianceDashboard
+                tenders={displayedTenders.length > 0 ? displayedTenders : tenders}
+                selectedTenderId={selectedComplianceTenderId}
+                onTenderSelect={(tId) => setSelectedComplianceTenderId(tId)}
+                onProceedToStratification={() => setActiveView('bidder_stratification')}
+                onSealAuditOnBlockchain={(tenderRef, bidderName, remarks, isApproved) => {
+                  const lastBlock = blockchainLedger[blockchainLedger.length - 1];
+                  const signerTitle = `${currentOfficer.fakeName} (${currentOfficer.designation})`;
 
-        {activeView === 'blockchain' && (
-          <BlockchainLedger
-            ledger={blockchainLedger}
-            onAddBlock={(block) => setBlockchainLedger(prev => [...prev, block])}
-          />
-        )}
+                  const newBlock: BlockchainBlock = {
+                    blockNumber: blockchainLedger.length,
+                    timestamp: new Date().toLocaleString('en-IN') + ' IST',
+                    previousHash: lastBlock.hash,
+                    hash: `0x0000${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`,
+                    nonce: Math.floor(Math.random() * 900000) + 100000,
+                    merkleRoot: `0x${Math.random().toString(16).substring(2, 10)}...`,
+                    tenderRef: tenderRef,
+                    event: isApproved
+                      ? `Statutory Audit Passed: Annexure-1 Compliances Sealed on Ledger (${remarks.substring(0, 40)}...)`
+                      : `Statutory Disqualification Seal: Anomaly > 40% Detected (${remarks.substring(0, 40)}...)`,
+                    verifiedBy: signerTitle,
+                    bidderName: bidderName,
+                    complianceScore: isApproved ? 96 : 38,
+                    status: 'VALID'
+                  };
+                  setBlockchainLedger(prev => [...prev, newBlock]);
+                }}
+              />
+            )}
 
-        {activeView === 'analytics' && (
-          <ProcurementAnalytics />
+            {/* Stage 3: 100-Bidder Stratification (Green / Orange / Red Zones) */}
+            {activeView === 'bidder_stratification' && (
+              <BidderZoneStratification
+                tender={activeTender}
+                officer={currentOfficer}
+                onProceedToDecisionTree={() => setActiveView('tree_flow')}
+                onBackToCompliance={() => setActiveView('compliance_dashboard')}
+              />
+            )}
+
+            {/* Stage 4: AI Decision Tree Flow */}
+            {activeView === 'tree_flow' && (
+              <DecisionTreeFlow
+                selectedBidder={treeSelectedBidder}
+                allBidders={allBiddersList}
+                onSelectBidder={(b) => setTreeSelectedBidder(b)}
+                onOpenAuditModal={(b) => {
+                  const matchedTender = tenders.find(t => t.bids.some(bid => bid.id === b.id)) || tenders[0];
+                  handleOpenAIVerifier(b, matchedTender);
+                }}
+              />
+            )}
+
+            {/* Stage 5: Blockchain Audit Ledger (Internal Officer Only) */}
+            {activeView === 'blockchain' && (
+              <BlockchainLedger
+                ledger={blockchainLedger}
+                onAddBlock={(block) => setBlockchainLedger(prev => [...prev, block])}
+              />
+            )}
+
+            {/* Stage 6: Procurement Analytics (Internal Officer Only) */}
+            {activeView === 'analytics' && (
+              <ProcurementAnalytics />
+            )}
+          </>
         )}
       </main>
+
+      {/* Tender PIN Authorization Gate Modal */}
+      <TenderPinModal
+        isOpen={!!tenderForPinModal}
+        tender={tenderForPinModal}
+        officer={currentOfficer}
+        onClose={() => setTenderForPinModal(null)}
+        onSuccessUnlock={handlePinUnlockSuccess}
+      />
 
       {/* Tender Detail Modal */}
       <TenderDetailModal
@@ -282,9 +380,8 @@ export default function App() {
           handleOpenAIVerifier(bidder, tender);
         }}
         onOpenComplianceDashboard={(tender) => {
-          setSelectedComplianceTenderId(tender.id);
-          setActiveView('compliance_dashboard');
           setSelectedTenderForModal(null);
+          setTenderForPinModal(tender);
         }}
       />
 
@@ -308,11 +405,13 @@ export default function App() {
           setCurrentOfficer(officer);
           setCurrentRole('officer');
           setIsCrossTerritoryOverride(false);
+          setActiveView('tenders');
         }}
         onSelectBidder={(bidder) => {
           setCurrentBidder(bidder);
           setCurrentRole('bidder');
           setIsCrossTerritoryOverride(false);
+          setActiveView('bidder_workspace');
         }}
         onOpenFresherWorkspace={(officer) => {
           setCurrentOfficer(officer);
@@ -344,7 +443,7 @@ export default function App() {
       {/* Official Government of India & Tenderkart Footer */}
       <footer className="bg-[#002B49] text-white border-t border-slate-800 text-xs mt-12" id="gem-portal-footer">
         {/* Tricolor divider */}
-        <div className="h-1 flex">
+        <div className="h-1.5 flex">
           <div className="flex-1 bg-[#FF9933]" />
           <div className="flex-1 bg-white" />
           <div className="flex-1 bg-[#138808]" />
@@ -355,7 +454,7 @@ export default function App() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="font-black text-lg text-white">GeM 5.0</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-bold">
+                <span className="text-[10px] px-1.5 py-0.5 bg-amber-400 text-slate-950 font-bold">
                   NATIONAL
                 </span>
               </div>
@@ -369,14 +468,14 @@ export default function App() {
 
             <div>
               <h4 className="font-bold text-white uppercase tracking-wider text-[11px] mb-3">
-                Quick Links
+                Evaluation Stages
               </h4>
               <ul className="space-y-1.5 text-xs">
-                <li><a href="#tenders" onClick={() => setActiveView('tenders')} className="hover:text-amber-300">Live Tenders</a></li>
-                <li><a href="#results" onClick={() => setActiveView('tenders')} className="hover:text-amber-300">Tender Results (AOC)</a></li>
-                <li><a href="#tree" onClick={() => setActiveView('tree_flow')} className="hover:text-amber-300">AI Decision Tree</a></li>
-                <li><a href="#blockchain" onClick={() => setActiveView('blockchain')} className="hover:text-amber-300">Blockchain Audit Ledger</a></li>
-                <li><a href="#analytics" onClick={() => setActiveView('analytics')} className="hover:text-amber-300">CPSE Impact Analytics</a></li>
+                <li><a href="#tenders" onClick={() => setActiveView('tenders')} className="hover:text-amber-300">1. Tenders & PIN Access</a></li>
+                <li><a href="#compliance" onClick={() => setActiveView('compliance_dashboard')} className="hover:text-amber-300">2. Compliance & Handshakes</a></li>
+                <li><a href="#stratification" onClick={() => setActiveView('bidder_stratification')} className="hover:text-amber-300">3. 100-Bidder Stratification (Zoning)</a></li>
+                <li><a href="#tree" onClick={() => setActiveView('tree_flow')} className="hover:text-amber-300">4. AI Decision Tree Flow</a></li>
+                <li><a href="#blockchain" onClick={() => setActiveView('blockchain')} className="hover:text-amber-300">5. Blockchain Audit Ledger</a></li>
               </ul>
             </div>
 
@@ -398,8 +497,8 @@ export default function App() {
                 Helpdesk & Support
               </h4>
               <div className="space-y-1.5 text-xs text-slate-400">
-                <div>Email: <strong className="text-slate-200">hello@tenderkart.in</strong></div>
-                <div>Toll Free / WhatsApp: <strong className="text-slate-200">+91 89711 26947</strong></div>
+                <div>Email: <strong className="text-slate-200">procurement-support@gem.gov.in</strong></div>
+                <div>Toll Free / Helpdesk: <strong className="text-slate-200">1800-419-3436 / 1800-102-3436</strong></div>
                 <div className="text-[11px] mt-2">
                   Operating Hours: Mon - Sat, 09:00 AM - 07:00 PM IST
                 </div>
@@ -408,11 +507,11 @@ export default function App() {
           </div>
 
           <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
-            <p>© 2026 Government e-Marketplace (GeM) & Tenderkart Integration. All rights reserved.</p>
+            <p>© 2026 Government e-Marketplace (GeM) & CPPP Integration. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <span className="hover:underline cursor-pointer">Privacy Policy</span>
               <span className="hover:underline cursor-pointer">Terms of Service</span>
-              <span className="hover:underline cursor-pointer">Security Whitepaper</span>
+              <span className="hover:underline cursor-pointer">GFR Rule 149 Guidelines</span>
             </div>
           </div>
         </div>
