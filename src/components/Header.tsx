@@ -10,12 +10,13 @@ import {
   Bell,
   Sparkles,
   ChevronDown,
-  RotateCcw
+  RotateCcw,
+  ShieldCheck
 } from 'lucide-react';
 
 interface HeaderProps {
-  activeView: 'tenders' | 'tree_flow' | 'blockchain' | 'analytics';
-  onSelectView: (view: 'tenders' | 'tree_flow' | 'blockchain' | 'analytics') => void;
+  activeView: 'tenders' | 'compliance_dashboard' | 'tree_flow' | 'blockchain' | 'analytics';
+  onSelectView: (view: 'tenders' | 'compliance_dashboard' | 'tree_flow' | 'blockchain' | 'analytics') => void;
   onReplayNamaste: () => void;
   language: 'en' | 'hi';
   onToggleLanguage: () => void;
@@ -182,6 +183,21 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Layers className="w-3.5 h-3.5 text-[#FF9933]" />
             <span>{language === 'hi' ? 'निविदाएं व परिणाम' : 'Tenders & Bids'}</span>
+          </button>
+
+          <button
+            onClick={() => onSelectView('compliance_dashboard')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              activeView === 'compliance_dashboard'
+                ? 'bg-[#002B49] text-white shadow-sm'
+                : 'text-slate-700 hover:bg-white hover:text-slate-900'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{language === 'hi' ? 'अनुपालन डैशबोर्ड (एनेक्सचर-1)' : 'Compliance Dashboard (Annexure-1)'}</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black font-mono">
+              HANDSHAKES
+            </span>
           </button>
 
           <button

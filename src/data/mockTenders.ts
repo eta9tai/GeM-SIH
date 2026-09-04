@@ -1,6 +1,7 @@
 import { Tender, BlockchainBlock } from '../types';
+import { enrichTendersWith5Bidders } from './tenderEnricher';
 
-export const INITIAL_TENDERS: Tender[] = [
+const RAW_TENDERS: Tender[] = [
   {
     id: 'edb53456-5812-464f-a174-9a215dd673d3',
     tenderId: '9588461',
@@ -40,7 +41,7 @@ export const INITIAL_TENDERS: Tender[] = [
     bids: [
       {
         id: 'bid-iaf-1',
-        companyName: 'SHREE VIJAY TRAVELS',
+        companyName: 'Marudhar Logistics & Fleet Mobility Pvt. Ltd.',
         location: 'Bikaner, Rajasthan',
         state: 'Rajasthan',
         bidNumber: 'GEM-9588461-20',
@@ -52,7 +53,7 @@ export const INITIAL_TENDERS: Tender[] = [
         isAwarded: true,
         tags: ['MSE', 'OBC', 'MII Class-I'],
         phone: '+91 94140 *****',
-        email: 'vijaytravels.bkn@gov-vendor.in',
+        email: 'fleet@marudharlogistics.gov.in',
         verificationData: {
           complianceScore: 98,
           riskLevel: 'Low',
@@ -105,7 +106,7 @@ export const INITIAL_TENDERS: Tender[] = [
       },
       {
         id: 'bid-iaf-2',
-        companyName: 'TRIDEV TRANSPORT COMPANY',
+        companyName: 'Aravalli Freight Lines Ltd.',
         location: 'Bikaner, Rajasthan',
         state: 'Rajasthan',
         bidNumber: 'GEM-9588461-23',
@@ -144,7 +145,7 @@ export const INITIAL_TENDERS: Tender[] = [
       },
       {
         id: 'bid-iaf-3',
-        companyName: 'H K LOGISTICS',
+        companyName: 'Rajputana Heavy Movers LLP',
         location: 'Jaipur, Rajasthan',
         state: 'Rajasthan',
         bidNumber: 'GEM-9588461-11',
@@ -180,7 +181,7 @@ export const INITIAL_TENDERS: Tender[] = [
       },
       {
         id: 'bid-iaf-4',
-        companyName: 'SHRI KARNI LOGISTIC SERVICES',
+        companyName: 'Thar Multimodal Transport Services',
         location: 'Jodhpur, Rajasthan',
         state: 'Rajasthan',
         bidNumber: 'GEM-9588461-21',
@@ -216,7 +217,7 @@ export const INITIAL_TENDERS: Tender[] = [
       },
       {
         id: 'bid-iaf-5',
-        companyName: 'ADITYA LOGISTICS',
+        companyName: 'Vidarbha Supply Chain Solutions Ltd.',
         location: 'Nagpur, Maharashtra',
         state: 'Maharashtra',
         bidNumber: 'GEM-9588461-1',
@@ -291,7 +292,7 @@ export const INITIAL_TENDERS: Tender[] = [
     bids: [
       {
         id: 'bid-army-1',
-        companyName: 'RADHE INDUSTRIES & TRADING CO.',
+        companyName: 'Howrah Precision Gears & Clutch Works',
         location: 'Howrah, West Bengal',
         state: 'West Bengal',
         bidNumber: 'GEM-9807729-3',
@@ -329,7 +330,7 @@ export const INITIAL_TENDERS: Tender[] = [
       },
       {
         id: 'bid-army-2',
-        companyName: 'M/s Dhruv Enterprises',
+        companyName: 'Hooghly Engineering & Spares Pvt. Ltd.',
         location: 'Kolkata, West Bengal',
         state: 'West Bengal',
         bidNumber: 'GEM-9807729-2',
@@ -400,7 +401,7 @@ export const INITIAL_TENDERS: Tender[] = [
     bids: [
       {
         id: 'bid-hpcl-1',
-        companyName: 'LIQUINOX GASES PRIVATE LIMITED',
+        companyName: 'Deccan Cryogenics & Petrochem Gases Ltd.',
         location: 'Hyderabad, Telangana',
         state: 'Telangana',
         bidNumber: 'GEM-9722980-3',
@@ -412,7 +413,7 @@ export const INITIAL_TENDERS: Tender[] = [
         isAwarded: true,
         tags: ['MII Class-I', 'Large Enterprise'],
         phone: '+91 40 2789 ****',
-        email: 'tenders@liquinoxgases.com',
+        email: 'tenders@deccancryo.com',
         verificationData: {
           complianceScore: 99,
           riskLevel: 'Low',
@@ -440,7 +441,7 @@ export const INITIAL_TENDERS: Tender[] = [
       },
       {
         id: 'bid-hpcl-2',
-        companyName: 'ELLENBARRIE INDUSTRIAL GASES LTD',
+        companyName: 'Ganga Industrial Gases & Purging Systems',
         location: 'Kolkata, West Bengal',
         state: 'West Bengal',
         bidNumber: 'GEM-9722980-1',
@@ -511,7 +512,7 @@ export const INITIAL_TENDERS: Tender[] = [
     bids: [
       {
         id: 'bid-sentry-1',
-        companyName: 'FIRDOUS ENTERPRISES',
+        companyName: 'Himalayan Optics & Tactical Electronics',
         location: 'Srinagar, Jammu And Kashmir',
         state: 'Jammu And Kashmir',
         bidNumber: 'GEM-9619679-3',
@@ -523,7 +524,7 @@ export const INITIAL_TENDERS: Tender[] = [
         isAwarded: true,
         tags: ['MSE', 'MII', 'General'],
         phone: '+91 194 245 ****',
-        email: 'contact@firdousinfra.in',
+        email: 'contact@himalayanoptics.gov.in',
         verificationData: {
           complianceScore: 97,
           riskLevel: 'Low',
@@ -551,7 +552,7 @@ export const INITIAL_TENDERS: Tender[] = [
       },
       {
         id: 'bid-sentry-2',
-        companyName: 'THE MIR ENTERPRISES',
+        companyName: 'Pir Panjal Surveillance Solutions',
         location: 'Srinagar, Jammu And Kashmir',
         state: 'Jammu And Kashmir',
         bidNumber: 'GEM-9619679-5',
@@ -622,7 +623,7 @@ export const INITIAL_TENDERS: Tender[] = [
     bids: [
       {
         id: 'bid-bel-1',
-        companyName: 'JOMA INDIA EV PRIVATE LIMITED',
+        companyName: 'Kavach Instrumentation & Loads Ltd.',
         location: 'Bengaluru Urban, Karnataka',
         state: 'Karnataka',
         bidNumber: 'GEM-9648633-2',
@@ -694,7 +695,7 @@ export const INITIAL_TENDERS: Tender[] = [
     bids: [
       {
         id: 'bid-icg-1',
-        companyName: 'M/S. KALI MANUFACTURING',
+        companyName: 'Bengal Smart Display Systems Pvt. Ltd.',
         location: 'Kolkata, West Bengal',
         state: 'West Bengal',
         bidNumber: 'GEM-9575266-3',
@@ -740,11 +741,11 @@ export const INITIAL_TENDERS: Tender[] = [
     description: 'High-speed benchtop refrigerated centrifuge with aerosol-tight rotor, microprocessor PID temperature control (-11°C to +40°C), continuous diagnostic sensors for Bhabha Atomic Research Centre lab.',
     organisation: 'Directorate Of Purchase And Stores',
     department: 'Department of Atomic Energy',
-    division: 'DPS Central Stores Trombay',
-    location: 'Mumbai Suburban, Maharashtra',
+    division: 'DPS Central Stores Trombay & Powai Division',
+    location: 'Powai & Trombay Hub, Mumbai Suburban, Maharashtra',
     state: 'Maharashtra',
     city: 'Mumbai Suburban',
-    pincode: 400085,
+    pincode: 400076,
     contractValue: 1251060,
     tenderType: 'Two Packet Bid',
     tenderCategory: 'Goods',
@@ -760,13 +761,13 @@ export const INITIAL_TENDERS: Tender[] = [
       purchasePreference: ['MSE', 'MII']
     },
     items: [
-      { name: 'Refrigerated Micro-Centrifuge 30130xg', quantity: 2, deliveryLocation: 'BARC MEDICAL LAB COMPLEX TROMBAY', specification: 'Rotor FA-45-30-11, CE certified' }
+      { name: 'Refrigerated Micro-Centrifuge 30130xg', quantity: 2, deliveryLocation: 'BARC MEDICAL LAB COMPLEX TROMBAY & POWAI R&D', specification: 'Rotor FA-45-30-11, CE certified' }
     ],
     bids: [
       {
         id: 'bid-dps-1',
-        companyName: 'EDUCATIONAL & RESEARCH AIDS COMPANY',
-        location: 'Mumbai, Maharashtra',
+        companyName: 'Sahyadri Scientific Instruments & Bio-Tech Labs',
+        location: 'Powai Industrial Area, Mumbai',
         state: 'Maharashtra',
         bidNumber: 'GEM-9317388-4',
         amount: 1251060,
@@ -775,14 +776,16 @@ export const INITIAL_TENDERS: Tender[] = [
         rank: 'L1',
         status: 'Qualified',
         isAwarded: true,
-        tags: ['Authorized OEM Partner', 'MSE'],
+        tags: ['Authorized OEM Partner', 'MSE', 'MII Class-I'],
+        phone: '+91 22 2570 ****',
+        email: 'tenders@sahyadriscientific.in',
         verificationData: {
           complianceScore: 98,
           riskLevel: 'Low',
           recommendation: 'Qualified',
-          recommendationReason: 'Direct manufacturer authorization verified. DAE security clearance intact.',
+          recommendationReason: 'Direct manufacturer authorization verified. DAE security clearance intact. Located in Mumbai Suburban / Powai Industrial Zone.',
           gapsAndDiscrepancies: [],
-          keyHighlights: ['ISO 13485 medical device compliance verified'],
+          keyHighlights: ['ISO 13485 medical device compliance verified', 'Local Powai manufacturing unit verified by DAE Inspectorate'],
           statutoryChecks: {
             gstnStatus: 'Active & Filing Up-to-date',
             gstinNumber: '27AAECE1190K1Z2',
@@ -800,10 +803,48 @@ export const INITIAL_TENDERS: Tender[] = [
           handshakes: [],
           documents: []
         }
+      },
+      {
+        id: 'bid-dps-2',
+        companyName: 'Kalyani Analytical Devices LLP',
+        location: 'Andheri East, Mumbai',
+        state: 'Maharashtra',
+        bidNumber: 'GEM-9317388-1',
+        amount: 1318000,
+        quotedAmount: 1318000,
+        rank: 'L2',
+        status: 'Qualified',
+        tags: ['MSE', 'General'],
+        verificationData: {
+          complianceScore: 93,
+          riskLevel: 'Low',
+          recommendation: 'Qualified',
+          recommendationReason: 'Technically compliant; quote is higher than L1.',
+          gapsAndDiscrepancies: [],
+          keyHighlights: ['Compliant on all statutory parameters'],
+          statutoryChecks: {
+            gstnStatus: 'Active & Filing Up-to-date',
+            gstinNumber: '27AABCK9921B1Z6',
+            udyamRegistration: 'UDYAM-MH-19-0019284',
+            udyamCategory: 'Micro',
+            panNumber: 'AABCK9921B',
+            panItrStatus: 'Verified (3 Yrs Filed)',
+            makeInIndiaPercentage: 58.0,
+            epfoStatus: 'Exempt / Not Applicable',
+            esicStatus: 'Exempt',
+            debarmentStatus: 'Clean (No Blacklist in CPPP/GeM)',
+            startupDpiit: false,
+            oemAuthorizationValid: true
+          },
+          handshakes: [],
+          documents: []
+        }
       }
     ]
   }
 ];
+
+export const INITIAL_TENDERS: Tender[] = enrichTendersWith5Bidders(RAW_TENDERS);
 
 export const INITIAL_BLOCKCHAIN_LEDGER: BlockchainBlock[] = [
   {
@@ -830,7 +871,7 @@ export const INITIAL_BLOCKCHAIN_LEDGER: BlockchainBlock[] = [
     tenderRef: 'GEM/2026/B/7770945',
     event: 'AI Cross-Verification Audit & Statutory Clearing (Udyam + GSTN + DigiLocker)',
     verifiedBy: 'AI Engine v4.2 & Wing Cdr. R. K. Saxena',
-    bidderName: 'SHREE VIJAY TRAVELS',
+    bidderName: 'Marudhar Logistics & Fleet Mobility Pvt. Ltd.',
     complianceScore: 98,
     status: 'VALID'
   },
@@ -844,7 +885,7 @@ export const INITIAL_BLOCKCHAIN_LEDGER: BlockchainBlock[] = [
     tenderRef: 'GEM/2026/B/7770945',
     event: 'Technical Disqualification Seal: Return Default (Rule 144(xi) GFR Flagged)',
     verifiedBy: 'GeM Statutory Compliance Bot #04',
-    bidderName: 'ADITYA LOGISTICS',
+    bidderName: 'Vidarbha Supply Chain Solutions Ltd.',
     complianceScore: 38,
     status: 'VALID'
   },
@@ -858,8 +899,22 @@ export const INITIAL_BLOCKCHAIN_LEDGER: BlockchainBlock[] = [
     tenderRef: 'GEM/2026/B/9807729',
     event: 'Army Base Workshop Technical Pass: OEM Spare Authentication Sealed',
     verifiedBy: 'Col. Vikram Singh (Director Procurement)',
-    bidderName: 'RADHE INDUSTRIES & TRADING CO.',
+    bidderName: 'Howrah Precision Gears & Clutch Works',
     complianceScore: 95,
+    status: 'VALID'
+  },
+  {
+    blockNumber: 4,
+    timestamp: '2026-09-04 11:35:10 IST',
+    previousHash: '0x00009182bcfe00194825be770192451029384756bcad10293847561029384756',
+    hash: '0x000021ab78912e094ba452179836104bcde88214fa1107936ef110294fcda991',
+    nonce: 319482,
+    merkleRoot: '0x99fa12e8bcde...',
+    tenderRef: 'GEM/2026/B/9317388',
+    event: 'DAE Powai Scientific Division: L1 Bid Verified & Award Sealed on Ledger',
+    verifiedBy: 'Prakash R. Deshmukh (EE) & Tanvi S. Kulkarni (APO)',
+    bidderName: 'Sahyadri Scientific Instruments & Bio-Tech Labs',
+    complianceScore: 98,
     status: 'VALID'
   }
 ];

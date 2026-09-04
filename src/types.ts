@@ -4,6 +4,68 @@ export type TenderCategory = 'Goods' | 'Services' | 'Works';
 
 export type TenderStatus = 'aoc' | 'financial_bid_opening' | 'financial_evaluation' | 'technical_evaluation' | 'active';
 
+export type ComplianceDocCategory =
+  | 'core_identity'
+  | 'financial_banking'
+  | 'bidding_credentials'
+  | 'labor_welfare'
+  | 'integrity_declarations';
+
+export interface SampleLetterData {
+  title: string;
+  authorityOrAct: string;
+  letterBody: string;
+  signatory: string;
+  designation: string;
+  stampVerified: boolean;
+  place: string;
+  date: string;
+  keyClauses: string[];
+}
+
+export interface BidderDocumentRecord {
+  id: string;
+  docCode: string;
+  title: string;
+  category: ComplianceDocCategory;
+  pdfAnnexureRef: string;
+  isMandatory: boolean;
+  submissionStatus: 'Submitted' | 'Verified' | 'Anomaly_Detected' | 'Missing';
+  variancePercentage: number;
+  isAnomaly: boolean;
+  anomalySeverity: 'none' | 'low' | 'critical';
+  anomalyDescription?: string;
+  blockchainHash: string;
+  ipfsCid: string;
+  timestamp: string;
+  verificationGateway: string;
+  sampleLetter: SampleLetterData;
+}
+
+export interface HandshakeSimulationNode {
+  id: string;
+  name: string;
+  state: string;
+  city: string;
+  type: 'bidder_origin' | 'state_gateway' | 'central_portal' | 'blockchain_node';
+  x: number; // percentage coordinate 0-100 for visual map/diagram
+  y: number;
+}
+
+export interface HandshakeSimulationStep {
+  id: string;
+  name: string;
+  sourceNodeId: string;
+  targetNodeId: string;
+  portalCode: string;
+  protocol: string;
+  status: 'idle' | 'in_transit' | 'verified_safe' | 'anomaly_flagged';
+  latencyMs: number;
+  securityShield: string;
+  payloadSummary: string;
+  auditTrailHash: string;
+}
+
 export interface BidderDocument {
   id: string;
   name: string;
@@ -84,6 +146,7 @@ export interface Bidder {
   phone?: string;
   email?: string;
   verificationData: BidderVerificationData;
+  complianceDocuments?: BidderDocumentRecord[];
 }
 
 export interface TenderItem {
@@ -153,4 +216,97 @@ export interface TreeNode {
   details: string;
   scoreImpact: string;
   children?: TreeNode[];
+}
+
+export interface OfficerJurisdiction {
+  state: string;
+  city: string;
+  circleOrZone: string;
+  department: string;
+  allowedCategories: TenderCategory[];
+  pincodes: number[];
+  jurisdictionCode: string;
+}
+
+export interface LegacyManualTender {
+  id: string;
+  tenderRef: string;
+  title: string;
+  dateProcessed: string;
+  department: string;
+  valueLakhs: number;
+  biddersCount: number;
+  biddersList: {
+    name: string;
+    status: 'Accepted' | 'Rejected';
+    reason: string;
+    manualChecksDone: string[];
+  }[];
+  winningBidder: string;
+  manualRepetitionsIdentified: string[];
+  processingDays: number;
+  cagAuditQueriesCount: number;
+  cagAuditRemarks?: string;
+}
+
+export interface TenderEfficiencyMetrics {
+  manualCycleDays: number;
+  projectedAiCycleDays: number;
+  manualRepetitionHoursPerTender: number;
+  projectedAiHoursPerTender: number;
+  cagAuditRiskScore: number; // e.g. 14.8% past manual discrepancy risk
+  projectedCagRiskScore: number; // e.g. 0.2%
+  totalLifetimeTendersApproved: number;
+  estimatedAdministrativeCostSavedLakhs: number;
+  verificationAccuracyPct: number;
+  projectedAccuracyPct: number;
+}
+
+export interface ProcurementOfficer {
+  id: string;
+  fakeName: string;
+  age: number;
+  designation: string;
+  designationHindi: string;
+  employeeCode: string;
+  department: string;
+  organization: string;
+  accountType: 'fresher' | 'plc'; // Fresher vs Prior Ledger Certified
+  systemPin: string;
+  blockchainAddress: string;
+  idBadgeUploaded: boolean;
+  idBadgeType?: string;
+  jurisdiction: OfficerJurisdiction;
+  efficiencyMetrics: TenderEfficiencyMetrics;
+  legacyRecords?: LegacyManualTender[];
+  hasIngestedLegacyProfile?: boolean;
+  ingestionTimestamp?: string;
+  bioNotes?: string;
+}
+
+export interface BidderAccount {
+  id: string;
+  companyName: string;
+  contactPerson: string;
+  gstin: string;
+  pan: string;
+  udyamNumber: string;
+  location: string;
+  state: string;
+  systemPin: string;
+  complianceScore: number;
+  activeBidsCount: number;
+  totalWonAmount: number;
+  tags: string[];
+  linkedTenderIds: string[];
+  riskLevel: 'Low' | 'Medium' | 'High';
+}
+
+export type UserRole = 'officer' | 'bidder';
+
+export interface UserSession {
+  role: UserRole;
+  officerAccount?: ProcurementOfficer;
+  bidderAccount?: BidderAccount;
+  isAuthenticated: boolean;
 }

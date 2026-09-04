@@ -28,13 +28,15 @@ interface TenderDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenAIVerifier: (bidder: Bidder, tender: Tender) => void;
+  onOpenComplianceDashboard?: (tender: Tender) => void;
 }
 
 export const TenderDetailModal: React.FC<TenderDetailModalProps> = ({
   tender,
   isOpen,
   onClose,
-  onOpenAIVerifier
+  onOpenAIVerifier,
+  onOpenComplianceDashboard
 }) => {
   if (!isOpen || !tender) return null;
 
@@ -215,16 +217,24 @@ export const TenderDetailModal: React.FC<TenderDetailModalProps> = ({
           {/* TAB: BIDS & COMPARISON */}
           {activeTab === 'bids' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Bid Qualification & Financial Ranking</h3>
                   <p className="text-xs text-slate-500">
                     Click any bidder to trigger real-time AI Multi-Portal verification and compliance analysis.
                   </p>
                 </div>
-                <div className="text-xs text-slate-500">
-                  Showing top {tender.bids.length} bids
-                </div>
+                {onOpenComplianceDashboard && (
+                  <button
+                    onClick={() => {
+                      onOpenComplianceDashboard(tender);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg bg-[#002B49] hover:bg-[#003c66] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors shrink-0"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Open Annexure-1 Compliance Dashboard</span>
+                  </button>
+                )}
               </div>
 
               <div className="divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">

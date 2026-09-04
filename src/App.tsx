@@ -8,6 +8,7 @@ import { ProcurementAnalytics } from './components/ProcurementAnalytics';
 import { TenderDetailModal } from './components/TenderDetailModal';
 import { AIVerificationEngineModal } from './components/AIVerificationEngineModal';
 import { AskGeMMyChatbot } from './components/AskGeMMyChatbot';
+import { ComplianceDashboard } from './components/ComplianceDashboard';
 import { INITIAL_TENDERS, INITIAL_BLOCKCHAIN_LEDGER } from './data/mockTenders';
 import { Tender, Bidder, BlockchainBlock } from './types';
 import { ShieldCheck, Heart, ExternalLink, HelpCircle } from 'lucide-react';
@@ -16,7 +17,8 @@ export default function App() {
   const [showPreloader, setShowPreloader] = useState(true);
   const [tenders, setTenders] = useState<Tender[]>(INITIAL_TENDERS);
   const [blockchainLedger, setBlockchainLedger] = useState<BlockchainBlock[]>(INITIAL_BLOCKCHAIN_LEDGER);
-  const [activeView, setActiveView] = useState<'tenders' | 'tree_flow' | 'blockchain' | 'analytics'>('tenders');
+  const [activeView, setActiveView] = useState<'tenders' | 'compliance_dashboard' | 'tree_flow' | 'blockchain' | 'analytics'>('tenders');
+  const [selectedComplianceTenderId, setSelectedComplianceTenderId] = useState<string>(INITIAL_TENDERS[0].id);
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
   const [fontSize, setFontSize] = useState<'small' | 'normal' | 'large'>('normal');
   const [searchQuery, setSearchQuery] = useState('');
@@ -131,6 +133,34 @@ export default function App() {
           />
         )}
 
+        {activeView === 'compliance_dashboard' && (
+          <ComplianceDashboard
+            tenders={tenders}
+            selectedTenderId={selectedComplianceTenderId}
+            onTenderSelect={(tId) => setSelectedComplianceTenderId(tId)}
+            onSealAuditOnBlockchain={(tenderRef, bidderName, remarks, isApproved) => {
+              const lastBlock = blockchainLedger[blockchainLedger.length - 1];
+              const newBlock: BlockchainBlock = {
+                blockNumber: blockchainLedger.length,
+                timestamp: new Date().toLocaleString('en-IN') + ' IST',
+                previousHash: lastBlock.hash,
+                hash: `0x0000${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`,
+                nonce: Math.floor(Math.random() * 900000) + 100000,
+                merkleRoot: `0x${Math.random().toString(16).substring(2, 10)}...`,
+                tenderRef: tenderRef,
+                event: isApproved
+                  ? `Statutory Audit Passed: Annexure-1 Compliances Sealed on Ledger (${remarks.substring(0, 40)}...)`
+                  : `Statutory Disqualification Seal: Anomaly > 40% Detected (${remarks.substring(0, 40)}...)`,
+                verifiedBy: 'Senior Procurement Officer (GeM Certified)',
+                bidderName: bidderName,
+                complianceScore: isApproved ? 96 : 38,
+                status: 'VALID'
+              };
+              setBlockchainLedger(prev => [...prev, newBlock]);
+            }}
+          />
+        )}
+
         {activeView === 'tree_flow' && (
           <DecisionTreeFlow
             selectedBidder={treeSelectedBidder}
@@ -163,6 +193,11 @@ export default function App() {
         onOpenAIVerifier={(bidder, tender) => {
           setSelectedTenderForModal(null);
           handleOpenAIVerifier(bidder, tender);
+        }}
+        onOpenComplianceDashboard={(tender) => {
+          setSelectedComplianceTenderId(tender.id);
+          setActiveView('compliance_dashboard');
+          setSelectedTenderForModal(null);
         }}
       />
 
