@@ -226,11 +226,11 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
-                <span>My Active Bidder Dashboard (Zone Status)</span>
+                <span>My Active Bidder Dashboard (Status & Letter)</span>
               </button>
 
               <div className="px-3 py-1 text-xs text-slate-600 italic">
-                (Internal Officer Audit Ledgers, Decision Trees, and Procurement Analytics are restricted)
+                (Internal Officer Audit Ledgers, Decision Trees, and Stratification Zones are confidential)
               </div>
             </>
           ) : (
