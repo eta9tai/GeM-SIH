@@ -1,0 +1,6 @@
+{
+  "name": "GeM Portal - AI Bid Compliance & Tender Procurement Platform",
+  "description": "Government e-Marketplace (GeM) & CPPP tender procurement portal featuring AI-powered automated multi-portal compliance verification, blockchain audit trail simulation, decision tree flow, and live tender data.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

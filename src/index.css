@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .font-hindi {
+    font-family: 'Tiro Devanagari Hindi', 'Rozha One', 'Plus Jakarta Sans', sans-serif;
+  }
+  .font-yatra {
+    font-family: 'Yatra One', 'Rozha One', cursive, sans-serif;
+  }
+  .tricolor-gradient-text {
+    background: linear-gradient(135deg, #FF9933 0%, #ffffff 48%, #138808 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .tricolor-border {
+    border-image: linear-gradient(to right, #FF9933, #ffffff, #138808) 1;
+  }
+  .tricolor-bar {
+    background: linear-gradient(to right, #FF9933 0%, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%, #138808 100%);
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
