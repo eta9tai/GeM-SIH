@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Header } from './components/Header';
 import { NamastePreloader } from './components/NamastePreloader';
 import { TenderList } from './components/TenderList';
@@ -9,8 +9,13 @@ import { TenderDetailModal } from './components/TenderDetailModal';
 import { AIVerificationEngineModal } from './components/AIVerificationEngineModal';
 import { AskGeMMyChatbot } from './components/AskGeMMyChatbot';
 import { ComplianceDashboard } from './components/ComplianceDashboard';
+import { AuthModal } from './components/AuthModal';
+import { FresherOnboardingModal } from './components/FresherOnboardingModal';
+import { EfficiencyLogicExplainerModal } from './components/EfficiencyLogicExplainerModal';
+import { JurisdictionBanner } from './components/JurisdictionBanner';
 import { INITIAL_TENDERS, INITIAL_BLOCKCHAIN_LEDGER } from './data/mockTenders';
-import { Tender, Bidder, BlockchainBlock } from './types';
+import { MOCK_PROCUREMENT_OFFICERS, MOCK_BIDDER_ACCOUNTS } from './data/mockOfficers';
+import { Tender, Bidder, BlockchainBlock, ProcurementOfficer, BidderAccount, UserRole } from './types';
 import { ShieldCheck, Heart, ExternalLink, HelpCircle } from 'lucide-react';
 
 export default function App() {
@@ -23,6 +28,17 @@ export default function App() {
   const [fontSize, setFontSize] = useState<'small' | 'normal' | 'large'>('normal');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // User Role & Account Simulation State
+  const [currentRole, setCurrentRole] = useState<UserRole>('officer');
+  const [currentOfficer, setCurrentOfficer] = useState<ProcurementOfficer>(MOCK_PROCUREMENT_OFFICERS[0]);
+  const [currentBidder, setCurrentBidder] = useState<BidderAccount>(MOCK_BIDDER_ACCOUNTS[0]);
+  const [isCrossTerritoryOverride, setIsCrossTerritoryOverride] = useState<boolean>(false);
+
+  // Modals for Auth, Fresher Onboarding, and Explainer
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isFresherModalOpen, setIsFresherModalOpen] = useState<boolean>(false);
+  const [isExplainerModalOpen, setIsExplainerModalOpen] = useState<boolean>(false);
+
   // Modals
   const [selectedTenderForModal, setSelectedTenderForModal] = useState<Tender | null>(null);
   const [selectedBidderForVerifier, setSelectedBidderForVerifier] = useState<{ bidder: Bidder; tender: Tender } | null>(null);
@@ -31,6 +47,36 @@ export default function App() {
   const [treeSelectedBidder, setTreeSelectedBidder] = useState<Bidder>(
     INITIAL_TENDERS[0].bids[0]
   );
+
+  // Territorial Jurisdiction Filtering
+  const displayedTenders = useMemo(() => {
+    if (currentRole === 'officer' && !isCrossTerritoryOverride) {
+      return tenders.filter(t => {
+        // 1. PIN code direct match
+        if (t.pincode && currentOfficer.jurisdiction.pincodes.includes(t.pincode)) {
+          return true;
+        }
+        // 2. City / Circle / Powai match within state
+        if (
+          t.state.toLowerCase() === currentOfficer.jurisdiction.state.toLowerCase() &&
+          (t.city?.toLowerCase().includes(currentOfficer.jurisdiction.city.toLowerCase()) ||
+           currentOfficer.jurisdiction.circleOrZone.toLowerCase().includes(t.city?.toLowerCase() || '') ||
+           t.location.toLowerCase().includes('powai'))
+        ) {
+          return true;
+        }
+        // 3. Department match within same state
+        if (
+          t.department?.toLowerCase() === currentOfficer.jurisdiction.department.toLowerCase() &&
+          t.state.toLowerCase() === currentOfficer.jurisdiction.state.toLowerCase()
+        ) {
+          return true;
+        }
+        return false;
+      });
+    }
+    return tenders;
+  }, [tenders, currentRole, currentOfficer, isCrossTerritoryOverride]);
 
   const handleOpenAIVerifier = (bidder: Bidder, tender: Tender) => {
     setSelectedBidderForVerifier({ bidder, tender });
@@ -58,8 +104,8 @@ export default function App() {
               ...b.verificationData,
               officerDecision: {
                 action,
-                officerName: 'Authorized Procurement Officer (GeM Certified)',
-                officerDesignation: 'Executive Engineer / CPO',
+                officerName: currentRole === 'officer' ? currentOfficer.fakeName : 'Authorized Officer',
+                officerDesignation: currentRole === 'officer' ? currentOfficer.designation : 'Executive Engineer / CPO',
                 timestamp: new Date().toLocaleString('en-IN'),
                 remarks,
                 blockchainTxHash: `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}...`
@@ -78,6 +124,10 @@ export default function App() {
     const targetTender = selectedBidderForVerifier?.tender || tenders[0];
     const targetBidder = selectedBidderForVerifier?.bidder || tenders[0].bids[0];
 
+    const officerSigner = currentRole === 'officer'
+      ? `${currentOfficer.fakeName} [${currentOfficer.employeeCode}] - ${currentOfficer.jurisdiction.circleOrZone}`
+      : 'Senior Procurement Officer (CPSE Validated)';
+
     const newBlock: BlockchainBlock = {
       blockNumber: newBlockNumber,
       timestamp: new Date().toLocaleString('en-IN') + ' IST',
@@ -87,13 +137,27 @@ export default function App() {
       merkleRoot: `0x${Math.random().toString(16).substring(2, 10)}...`,
       tenderRef: targetTender.referenceNumber,
       event: `Procurement Officer Executive Order: ${action} (${remarks.substring(0, 45)}...)`,
-      verifiedBy: 'Senior Procurement Officer (CPSE Validated)',
+      verifiedBy: officerSigner,
       bidderName: targetBidder.companyName,
       complianceScore: targetBidder.verificationData.complianceScore,
       status: 'VALID'
     };
 
     setBlockchainLedger(prev => [...prev, newBlock]);
+  };
+
+  const handleCompleteFresherIngestion = (officerId: string) => {
+    setCurrentOfficer(prev => ({
+      ...prev,
+      hasIngestedLegacyProfile: true,
+      accountType: 'plc' as any,
+      efficiencyMetrics: {
+        ...prev.efficiencyMetrics,
+        cagAuditRiskScore: 6.0,
+        manualCycleDays: 2.4,
+        verificationAccuracyPct: 99.4
+      }
+    }));
   };
 
   // Font size multiplier class
@@ -120,13 +184,32 @@ export default function App() {
         onSearchChange={setSearchQuery}
         fontSize={fontSize}
         onChangeFontSize={setFontSize}
+        currentRole={currentRole}
+        currentOfficer={currentOfficer}
+        currentBidder={currentBidder}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenExplainerModal={() => setIsExplainerModalOpen(true)}
       />
 
       {/* Main Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {/* Territorial Jurisdiction Security Banner */}
+        <JurisdictionBanner
+          currentRole={currentRole}
+          officer={currentOfficer}
+          bidder={currentBidder}
+          isCrossTerritoryOverride={isCrossTerritoryOverride}
+          onToggleCrossTerritoryOverride={() => setIsCrossTerritoryOverride(prev => !prev)}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onOpenFresherModal={() => setIsFresherModalOpen(true)}
+          onOpenExplainerModal={() => setIsExplainerModalOpen(true)}
+          filteredCount={displayedTenders.length}
+          totalCount={tenders.length}
+        />
+
         {activeView === 'tenders' && (
           <TenderList
-            tenders={tenders}
+            tenders={displayedTenders}
             onSelectTender={(tender) => setSelectedTenderForModal(tender)}
             onOpenAIVerifier={handleOpenAIVerifier}
             searchQuery={searchQuery}
@@ -135,11 +218,15 @@ export default function App() {
 
         {activeView === 'compliance_dashboard' && (
           <ComplianceDashboard
-            tenders={tenders}
+            tenders={displayedTenders.length > 0 ? displayedTenders : tenders}
             selectedTenderId={selectedComplianceTenderId}
             onTenderSelect={(tId) => setSelectedComplianceTenderId(tId)}
             onSealAuditOnBlockchain={(tenderRef, bidderName, remarks, isApproved) => {
               const lastBlock = blockchainLedger[blockchainLedger.length - 1];
+              const signerTitle = currentRole === 'officer'
+                ? `${currentOfficer.fakeName} (${currentOfficer.designation})`
+                : 'Senior Procurement Officer (GeM Certified)';
+
               const newBlock: BlockchainBlock = {
                 blockNumber: blockchainLedger.length,
                 timestamp: new Date().toLocaleString('en-IN') + ' IST',
@@ -151,7 +238,7 @@ export default function App() {
                 event: isApproved
                   ? `Statutory Audit Passed: Annexure-1 Compliances Sealed on Ledger (${remarks.substring(0, 40)}...)`
                   : `Statutory Disqualification Seal: Anomaly > 40% Detected (${remarks.substring(0, 40)}...)`,
-                verifiedBy: 'Senior Procurement Officer (GeM Certified)',
+                verifiedBy: signerTitle,
                 bidderName: bidderName,
                 complianceScore: isApproved ? 96 : 38,
                 status: 'VALID'
@@ -208,6 +295,44 @@ export default function App() {
         isOpen={!!selectedBidderForVerifier}
         onClose={() => setSelectedBidderForVerifier(null)}
         onRecordOfficerDecision={handleRecordOfficerDecision}
+      />
+
+      {/* Dual-Role Authentication & Multi-Account Simulation Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentRole={currentRole}
+        currentOfficer={currentOfficer}
+        currentBidder={currentBidder}
+        onSelectOfficer={(officer) => {
+          setCurrentOfficer(officer);
+          setCurrentRole('officer');
+          setIsCrossTerritoryOverride(false);
+        }}
+        onSelectBidder={(bidder) => {
+          setCurrentBidder(bidder);
+          setCurrentRole('bidder');
+          setIsCrossTerritoryOverride(false);
+        }}
+        onOpenFresherWorkspace={(officer) => {
+          setCurrentOfficer(officer);
+          setCurrentRole('officer');
+          setIsFresherModalOpen(true);
+        }}
+      />
+
+      {/* Fresher Officer Legacy Dossier Ingestion Modal */}
+      <FresherOnboardingModal
+        isOpen={isFresherModalOpen}
+        onClose={() => setIsFresherModalOpen(false)}
+        officer={currentOfficer}
+        onCompleteIngestion={handleCompleteFresherIngestion}
+      />
+
+      {/* Quantitative Efficiency & Algorithmic Logic Explainer Modal */}
+      <EfficiencyLogicExplainerModal
+        isOpen={isExplainerModalOpen}
+        onClose={() => setIsExplainerModalOpen(false)}
       />
 
       {/* Floating Ask GeMMy AI Chatbot */}

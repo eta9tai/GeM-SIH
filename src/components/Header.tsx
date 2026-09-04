@@ -11,8 +11,13 @@ import {
   Sparkles,
   ChevronDown,
   RotateCcw,
-  ShieldCheck
+  ShieldCheck,
+  UserCheck,
+  Briefcase,
+  HelpCircle,
+  ArrowRightLeft
 } from 'lucide-react';
+import { ProcurementOfficer, BidderAccount, UserRole } from '../types';
 
 interface HeaderProps {
   activeView: 'tenders' | 'compliance_dashboard' | 'tree_flow' | 'blockchain' | 'analytics';
@@ -24,6 +29,11 @@ interface HeaderProps {
   onSearchChange: (q: string) => void;
   fontSize: 'normal' | 'large' | 'small';
   onChangeFontSize: (size: 'normal' | 'large' | 'small') => void;
+  currentRole: UserRole;
+  currentOfficer?: ProcurementOfficer;
+  currentBidder?: BidderAccount;
+  onOpenAuthModal: () => void;
+  onOpenExplainerModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -35,7 +45,12 @@ export const Header: React.FC<HeaderProps> = ({
   searchQuery,
   onSearchChange,
   fontSize,
-  onChangeFontSize
+  onChangeFontSize,
+  currentRole,
+  currentOfficer,
+  currentBidder,
+  onOpenAuthModal,
+  onOpenExplainerModal
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm" id="gem-main-header">
@@ -158,15 +173,61 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Right Portal Badge */}
-        <div className="hidden xl:flex items-center gap-2 text-right">
-          <div className="text-[11px]">
-            <div className="font-bold text-slate-900">Procurement Officer Desk</div>
-            <div className="text-emerald-600 font-medium flex items-center justify-end gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Central Verification Mode Active
+        {/* Right Role & Account Selector Badge */}
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={onOpenExplainerModal}
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors border border-slate-300"
+            title="Tender Efficiency & Logic Explainer"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
+            <span>Logic Explainer</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenAuthModal}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 transition-all text-left shadow-xs hover:border-blue-400 group"
+          >
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+              currentRole === 'officer'
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-emerald-100 text-emerald-800'
+            }`}>
+              {currentRole === 'officer' ? (
+                <UserCheck className="w-4 h-4" />
+              ) : (
+                <Briefcase className="w-4 h-4" />
+              )}
             </div>
-          </div>
+
+            <div className="hidden sm:block">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  {currentRole === 'officer' ? 'Officer' : 'Bidder'}
+                </span>
+                <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold ${
+                  currentRole === 'officer'
+                    ? currentOfficer?.accountType === 'fresher'
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-emerald-100 text-emerald-800'
+                    : 'bg-teal-100 text-teal-800'
+                }`}>
+                  {currentRole === 'officer'
+                    ? currentOfficer?.accountType === 'fresher' ? 'Fresher' : 'PLC'
+                    : 'Vendor'}
+                </span>
+              </div>
+              <div className="text-xs font-bold text-slate-900 group-hover:text-blue-900 max-w-[140px] truncate">
+                {currentRole === 'officer'
+                  ? currentOfficer?.fakeName || 'Procurement Officer'
+                  : currentBidder?.companyName || 'Registered Bidder'}
+              </div>
+            </div>
+
+            <ArrowRightLeft className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 shrink-0 ml-1" />
+          </button>
         </div>
       </div>
 

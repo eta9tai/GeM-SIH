@@ -4,39 +4,39 @@ export const MOCK_PROCUREMENT_OFFICERS: ProcurementOfficer[] = [
   {
     id: 'off-fresher-tanvi',
     fakeName: 'Tanvi S. Kulkarni',
-    age: 29,
-    designation: 'Assistant Procurement Officer (Technical Scrutiny Desk)',
-    designationHindi: 'सहायक खरीद अधिकारी (तकनीकी जांच डेस्क)',
+    age: 27,
+    designation: 'Assistant Procurement Officer (Fresher)',
+    designationHindi: 'सहायक खरीद अधिकारी (नवागंतुक / फ्रेशर)',
     employeeCode: 'DAE-POWAI-2026-F09',
-    department: 'Department of Atomic Energy & Allied Research Units',
+    department: 'Department of Atomic Energy & Central Stores',
     organization: 'Directorate of Purchase and Stores (DPS) / BARC-IIT Powai Liaison',
     accountType: 'fresher',
-    systemPin: '400076',
+    systemPin: '4076',
     blockchainAddress: '0x71ba920f12d8a4190cbb1156d98214fa3901bcae',
     idBadgeUploaded: true,
     idBadgeType: 'NIC Gov e-Sign Digital Smart Card (Issued Aug 2026)',
     jurisdiction: {
       state: 'Maharashtra',
       city: 'Mumbai Suburban',
-      circleOrZone: 'Powai & Trombay Circle (Mumbai-East)',
+      circleOrZone: 'Powai & Trombay Hub, Mumbai Suburban',
       department: 'Department of Atomic Energy',
       allowedCategories: ['Goods', 'Services'],
       pincodes: [400076, 400085, 400072],
-      jurisdictionCode: 'MH-MUM-SUB-POWAI-04'
+      jurisdictionCode: 'MH-MUM-SUB-POWAI-400076'
     },
-    bioNotes: 'Newly onboarded to the GeM 5.0 unified AI & blockchain interface. Holds 4 years of prior manual paper-based tender evaluations in zonal laboratories before digital migration.',
+    bioNotes: 'Newly onboarded to the GeM 5.0 unified AI & blockchain interface. Holds prior physical legacy register records requiring dossier ingestion.',
     hasIngestedLegacyProfile: false,
     efficiencyMetrics: {
-      manualCycleDays: 46.5,
-      projectedAiCycleDays: 3.8,
+      manualCycleDays: 38.5,
+      projectedAiCycleDays: 2.4,
       manualRepetitionHoursPerTender: 54.0,
       projectedAiHoursPerTender: 1.4,
-      cagAuditRiskScore: 14.8, // 14.8% past paper discrepancy risk
-      projectedCagRiskScore: 0.2, // 0.2% on blockchain
+      cagAuditRiskScore: 82.0, // High manual CAG audit risk
+      projectedCagRiskScore: 6.0, // Reduced to 6/100
       totalLifetimeTendersApproved: 19,
-      estimatedAdministrativeCostSavedLakhs: 21.4,
-      verificationAccuracyPct: 83.2,
-      projectedAccuracyPct: 99.8
+      estimatedAdministrativeCostSavedLakhs: 40.7,
+      verificationAccuracyPct: 68.0,
+      projectedAccuracyPct: 99.4
     },
     legacyRecords: [
       {
@@ -128,177 +128,121 @@ export const MOCK_PROCUREMENT_OFFICERS: ProcurementOfficer[] = [
         processingDays: 52,
         cagAuditQueriesCount: 1,
         cagAuditRemarks: 'Audit Observation: Absence of digital timestamp on envelope receipt register resulting in supplier grievance.'
-      },
-      {
-        id: 'leg-tnd-03',
-        tenderRef: 'DAE/POWAI/ELEC/2025/11',
-        title: 'Supply and Laying of Armoured 11kV Underground Power Feeder Cables',
-        dateProcessed: '18 Jul 2025 (Physical File Memo)',
-        department: 'Department of Atomic Energy',
-        valueLakhs: 41.0,
-        biddersCount: 3,
-        biddersList: [
-          {
-            name: 'Maratha Heavy Electricals & Cables Ltd.',
-            status: 'Accepted',
-            reason: 'OEM test certificate physically counter-signed by CPRI (Central Power Research Institute).',
-            manualChecksDone: ['Physical CPRI test report stamp verification']
-          },
-          {
-            name: 'Vidyut Cables Corp',
-            status: 'Rejected',
-            reason: 'Physical insurance policy cover note expired during bid evaluation period.',
-            manualChecksDone: ['Paper insurance document check']
-          }
-        ],
-        winningBidder: 'Maratha Heavy Electricals & Cables Ltd.',
-        manualRepetitionsIdentified: [
-          'Manual physical measurement book (MB) reconciliation',
-          'Paper-based BG verification causing 23-day wait time'
-        ],
-        processingDays: 44,
-        cagAuditQueriesCount: 0,
-        cagAuditRemarks: 'Clean manual audit cleared without adverse audit paras.'
-      },
-      {
-        id: 'leg-tnd-04',
-        tenderRef: 'DAE/LAB/SAFETY/2025/19',
-        title: 'Radiation Safety Equipment & Thermo-Luminescent Dosimeter (TLD) Badges',
-        dateProcessed: '03 Nov 2025 (Physical File Memo)',
-        department: 'Department of Atomic Energy',
-        valueLakhs: 8.9,
-        biddersCount: 3,
-        biddersList: [
-          {
-            name: 'Sahyadri Scientific Instruments & Bio-Tech Labs',
-            status: 'Accepted',
-            reason: 'AERB (Atomic Energy Regulatory Board) accreditation physically validated with Trombay registry.',
-            manualChecksDone: ['Physical AERB certificate serial verification']
-          }
-        ],
-        winningBidder: 'Sahyadri Scientific Instruments & Bio-Tech Labs',
-        manualRepetitionsIdentified: [
-          'Duplicate filing across 3 paper registers (Inward, Scrutiny, and Sanction memo)',
-          'Physical manual calculations of local octroi/cess exemptions'
-        ],
-        processingDays: 42,
-        cagAuditQueriesCount: 1,
-        cagAuditRemarks: 'Audit query on delayed delivery penalty calculations done manually.'
       }
     ]
   },
   {
     id: 'off-senior-deshmukh',
     fakeName: 'Prakash R. Deshmukh',
-    age: 51,
-    designation: 'Executive Engineer & Senior Procurement Officer (Secondary Buyer)',
-    designationHindi: 'अधिशासी अभियंता एवं वरिष्ठ खरीद अधिकारी',
-    employeeCode: 'DAE-POWAI-1999-EE02',
-    department: 'Department of Atomic Energy & Infrastructure Division',
-    organization: 'Directorate of Purchase and Stores (DPS) Trombay / Mumbai Zone',
+    age: 49,
+    designation: 'Executive Engineer & Senior Buyer (PLC Certified)',
+    designationHindi: 'अधिशासी अभियंता एवं वरिष्ठ खरीद अधिकारी (पीएलसी प्रमाणित)',
+    employeeCode: 'CPWD-DAE-1998-EE02',
+    department: 'CPWD & DAE Western Division',
+    organization: 'CPWD & DAE Western Division, Mumbai Suburban & Powai Circle',
     accountType: 'plc',
-    systemPin: '400085',
+    systemPin: '4076',
     blockchainAddress: '0x89e27c11fba82946cde0019245be770192451029',
     idBadgeUploaded: true,
     idBadgeType: 'Government of India Class-3 Digital Signature Token (e-Mudhra / NIC)',
     jurisdiction: {
       state: 'Maharashtra',
       city: 'Mumbai Suburban',
-      circleOrZone: 'Powai Circle, Trombay & Vikhroli Hub',
+      circleOrZone: 'Mumbai Suburban & Powai Circle',
       department: 'Department of Atomic Energy',
       allowedCategories: ['Goods', 'Works', 'Services'],
-      pincodes: [400085, 400076, 400079],
-      jurisdictionCode: 'MH-MUM-SUB-POWAI-01'
+      pincodes: [400076, 400085, 400072],
+      jurisdictionCode: 'MH-MUM-SUB-POWAI-400076'
     },
     bioNotes: '24 years of public procurement experience. Fully Prior Ledger Certified (PLC) on GeM with 180+ verified digital tender awards on the cryptographic blockchain registry.',
     hasIngestedLegacyProfile: true,
     efficiencyMetrics: {
-      manualCycleDays: 42.0,
-      projectedAiCycleDays: 3.2,
+      manualCycleDays: 38.5,
+      projectedAiCycleDays: 2.4,
       manualRepetitionHoursPerTender: 48.0,
       projectedAiHoursPerTender: 1.1,
-      cagAuditRiskScore: 6.2,
-      projectedCagRiskScore: 0.05,
+      cagAuditRiskScore: 82.0,
+      projectedCagRiskScore: 6.0,
       totalLifetimeTendersApproved: 184,
       estimatedAdministrativeCostSavedLakhs: 88.5,
-      verificationAccuracyPct: 94.0,
-      projectedAccuracyPct: 99.9
+      verificationAccuracyPct: 68.0,
+      projectedAccuracyPct: 99.4
     }
   },
   {
-    id: 'off-hod-bhatnagar',
-    fakeName: 'Rajeshwar M. Bhatnagar',
-    age: 56,
-    designation: 'Chief Procurement Officer & Directorate Head (Primary Buyer / HoD)',
-    designationHindi: 'मुख्य खरीद अधिकारी एवं विभागाध्यक्ष (प्राथमिक खरीदार)',
-    employeeCode: 'MOD-IAF-1992-CPO01',
-    department: 'Ministry Of Defence',
-    organization: 'Indian Air Force Equipment Directorate & 35 Wing Public Fund Account',
+    id: 'off-bajwa',
+    fakeName: 'Col. Vikramjit S. Bajwa',
+    age: 52,
+    designation: 'Director of Procurement (PLC Certified)',
+    designationHindi: 'निदेशक (खरीद एवं आपूर्ति) - पीएलसी प्रमाणित',
+    employeeCode: 'MOD-ARMY-1996-DIR01',
+    department: 'Ministry of Defence / Army Base',
+    organization: 'Directorate General of Ordnance Services & 512 Army Base Workshop',
     accountType: 'plc',
-    systemPin: '110011',
+    systemPin: '1100',
     blockchainAddress: '0x3ca1194825be770192451029384756bcad102938',
     idBadgeUploaded: true,
     idBadgeType: 'Ministry of Defence Cryptographic Nodal Token & Smart Identity Card',
     jurisdiction: {
-      state: 'Uttar Pradesh',
-      city: 'Kheri',
-      circleOrZone: 'Northern & Western Airbase Circles (Kheri & Suratgarh)',
+      state: 'Delhi',
+      city: 'New Delhi',
+      circleOrZone: 'Ministry of Defence / Army Base, New Delhi',
       department: 'Ministry Of Defence',
       allowedCategories: ['Goods', 'Services', 'Works'],
-      pincodes: [262701, 335804],
-      jurisdictionCode: 'UP-IAF-NORTH-ZONE-01'
+      pincodes: [110011, 262701, 735101],
+      jurisdictionCode: 'DL-DELHI-MOD-110011'
     },
-    bioNotes: 'Primary User & Head of Department. Highest financial delegation under Rule 149 GFR. Oversees heavy equipment transport and defence machinery contracts.',
+    bioNotes: 'Director of Procurement. Oversees military base logistics, automotive heavy spares, and defense supplies with cryptographic ledger clearance.',
     hasIngestedLegacyProfile: true,
     efficiencyMetrics: {
-      manualCycleDays: 58.0,
-      projectedAiCycleDays: 4.1,
+      manualCycleDays: 38.5,
+      projectedAiCycleDays: 2.4,
       manualRepetitionHoursPerTender: 62.0,
       projectedAiHoursPerTender: 1.8,
-      cagAuditRiskScore: 8.5,
-      projectedCagRiskScore: 0.1,
+      cagAuditRiskScore: 82.0,
+      projectedCagRiskScore: 6.0,
       totalLifetimeTendersApproved: 310,
       estimatedAdministrativeCostSavedLakhs: 142.0,
-      verificationAccuracyPct: 96.5,
-      projectedAccuracyPct: 99.9
+      verificationAccuracyPct: 68.0,
+      projectedAccuracyPct: 99.4
     }
   },
   {
-    id: 'off-director-banerjee',
-    fakeName: 'Sunita B. Banerjee',
+    id: 'off-sundaram',
+    fakeName: 'Rajeshwari Sundaram',
     age: 44,
-    designation: 'Joint Director (Procurement & Stores)',
-    designationHindi: 'संयुक्त निदेशक (खरीद एवं सामग्री प्रबंधन)',
-    employeeCode: 'MOD-ICG-2004-JD11',
-    department: 'Ministry Of Defence',
-    organization: 'Indian Coast Guard Regional HQ (NE) & Base Workshop',
+    designation: 'General Manager - Materials & Contracts (PLC Certified)',
+    designationHindi: 'महाप्रबंधक (सामग्री एवं अनुबंध) - पीएलसी प्रमाणित',
+    employeeCode: 'BEL-BLR-2002-GM08',
+    department: 'BEL & Aerospace Division',
+    organization: 'Bharat Electronics Limited (BEL), Bengaluru Urban Complex',
     accountType: 'plc',
-    systemPin: '700027',
-    blockchainAddress: '0x19dfa98124567812039ba77123901bcae8841091',
+    systemPin: '5600',
+    blockchainAddress: '0x56a29f8124567812039ba77123901bcae8841091',
     idBadgeUploaded: true,
     idBadgeType: 'DigiLocker Certified e-Office Identification Card',
     jurisdiction: {
-      state: 'West Bengal',
-      city: 'Kolkata',
-      circleOrZone: 'Eastern Naval & Coast Guard Command (24 Paraganas & Jalpaiguri)',
+      state: 'Karnataka',
+      city: 'Bengaluru Urban',
+      circleOrZone: 'BEL & Aerospace Division, Bengaluru Urban',
       department: 'Ministry Of Defence',
       allowedCategories: ['Goods', 'Works'],
-      pincodes: [700027, 735101],
-      jurisdictionCode: 'WB-KOL-EAST-ZONE-02'
+      pincodes: [560013],
+      jurisdictionCode: 'KA-BLR-BEL-560013'
     },
-    bioNotes: 'Experienced secondary buyer handling strategic electronics, tactical displays, and naval maintenance contracts with strict DPIIT Class-I local content mandates.',
+    bioNotes: 'General Manager handling precision electronics, radar testing instrumentation, and high-tech defense electronics contracts.',
     hasIngestedLegacyProfile: true,
     efficiencyMetrics: {
-      manualCycleDays: 39.0,
-      projectedAiCycleDays: 3.0,
+      manualCycleDays: 38.5,
+      projectedAiCycleDays: 2.4,
       manualRepetitionHoursPerTender: 44.0,
       projectedAiHoursPerTender: 1.2,
-      cagAuditRiskScore: 5.1,
-      projectedCagRiskScore: 0.08,
-      totalLifetimeTendersApproved: 128,
-      estimatedAdministrativeCostSavedLakhs: 56.2,
-      verificationAccuracyPct: 95.0,
-      projectedAccuracyPct: 99.8
+      cagAuditRiskScore: 82.0,
+      projectedCagRiskScore: 6.0,
+      totalLifetimeTendersApproved: 142,
+      estimatedAdministrativeCostSavedLakhs: 64.8,
+      verificationAccuracyPct: 68.0,
+      projectedAccuracyPct: 99.4
     }
   }
 ];
